@@ -51,6 +51,52 @@ class UIhandle{
     }
 }
 
+class Store{
+ static getBooks(){
+     let books;
+     if(localStorage.getItem('books') === null){
+         books = [];
+     }
+     else{
+         books = JSON.parse(localStorage.getItem('books'))
+     }
+
+     return books;
+ }
+ static addBookToStore(book){
+     let books = Store.getBooks();
+     books.push(book)
+     localStorage.setItem("books", JSON.stringify(books) )
+
+ }
+
+ static displayBooks(){
+     let books = Store.getBooks();
+     books.forEach(function(book)
+     {
+         const ui = new UIhandle;
+         ui.setListOnTable(book)
+     }
+     )
+ }
+ static delfromStore(category){
+     const books = Store.getBooks();
+     books.forEach(function(book,index){
+        if(book.category === category){
+            books.splice(index,1)
+        }
+     })
+     localStorage.setItem("books", JSON.stringify(books))
+
+ }
+
+
+}
+
+document.addEventListener("DOMContentLoaded", (e=>{
+    Store.displayBooks()
+    e.preventDefault()
+}))
 document.getElementById("book-form").addEventListener("submit", (e)=>{
     console.log("Somthing Happened ")
     const title = document.getElementById('title').value,
@@ -63,11 +109,13 @@ document.getElementById("book-form").addEventListener("submit", (e)=>{
     
     ui = new UIhandle()
 
+
     if(author === '' || title === '' || isbn === '' || cat === ''){
         
         ui.showAlert("Hey Nigga, All fields are mandatory","error");
     }else{
         ui.setListOnTable(book)
+        Store.addBookToStore(book)
         ui.showAlert("Yo Nigs, Added that Book Chill....", "success");
         ui.clearTask()
         
@@ -82,6 +130,7 @@ document.getElementById("book-list").addEventListener("click", (e)=>{
     
      const ui = new UIhandle()
      ui.deleteBook(e.target)
+     Store.delfromStore(e.target.parentElement.previousElementSibling.textContent)
      ui.showAlert("Deleted Successfully", "success")
     e.preventDefault()
 })
